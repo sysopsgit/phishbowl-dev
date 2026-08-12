@@ -1,0 +1,37 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "{{APP_ID}}",
+  "packageName": "com.phishbowl.teams",
+  "developer": {
+    "name": "PhishBowl",
+    "websiteUrl": "{{SITE_URL}}",
+    "privacyUrl": "{{SITE_URL}}/privacy",
+    "termsOfUseUrl": "{{SITE_URL}}/terms"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "PhishBowl",
+    "full": "PhishBowl - Phishing Awareness"
+  },
+  "description": {
+    "short": "Phishing awareness training gallery",
+    "full": "Educational resource showcasing real-world phishing email examples. Learn to spot credential theft, invoice fraud, impersonation attacks and more before you fall for them."
+  },
+  "accentColor": "#6E40C9",
+  "staticTabs": [
+    {
+      "entityId": "gallery",
+      "name": "Gallery",
+      "contentUrl": "{{SITE_URL}}",
+      "websiteUrl": "{{SITE_URL}}",
+      "scopes": ["personal"]
+    }
+  ],
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": ["{{DOMAIN}}"]
+}
