@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Scam - PhishAware</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a href="index.html" class="back-link">&larr; Back to Gallery</a>
+
+  <div class="detail-container">
+    <h1>"Overdue Invoice" Financial Fraud</h1>
+    <span class="severity critical">Critical Severity</span>
+
+    <div class="email-sim">
+      <div class="email-header">
+        <div class="field"><span class="label">From:</span> <span class="value">Accounts Payable &lt;invoices@quickbooks-billing.com&gt;</span> <span class="sus">SUSPICIOUS</span></div>
+        <div class="field"><span class="label">Subject:</span> <span class="value">Overdue Invoice #8842 - Payment Required</span></div>
+        <div class="field"><span class="label">To:</span> <span class="value">you@yourcompany.com</span></div>
+      </div>
+      <div class="email-body">
+        <div class="logo-area">
+          <div class="fake-logo">&#x25A0; QuickBooks Billing</div>
+        </div>
+
+        <p>Dear Valued Customer,</p>
+        <p>Our records indicate that <strong>Invoice #8842</strong> for <strong>$3,450.00</strong> is now <span class="highlight-red">15 days past due</span>.</p>
+        <p>Please find the invoice attached. Payment must be received within <strong>48 hours</strong> to avoid the following:</p>
+        <ul>
+          <li>Service suspension</li>
+          <li>Late payment penalty of $150</li>
+          <li>Referral to collections agency</li>
+        </ul>
+        <div class="fake-btn">View &amp; Pay Invoice</div>
+        <p style="color:#666;font-size:0.82rem;margin-top:16px;">Attachment: INV-8842-QB-2026.zip (214 KB)</p>
+      </div>
+    </div>
+
+    <div class="red-flags">
+      <h2>Red Flags to Look For</h2>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F4CE;</span>
+        <div class="flag-content">
+          <h4>Suspicious Attachment (ZIP file)</h4>
+          <p>Legitimate invoices are PDFs, not ZIP files. ZIP attachments from unknown senders almost always contain malware. Never open them.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F4B0;</span>
+        <div class="flag-content">
+          <h4>Pressure for Immediate Payment</h4>
+          <p>Threatening service suspension and collections within 48 hours is a classic pressure tactic. Always verify invoices through your internal accounting system.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F3E2;</span>
+        <div class="flag-content">
+          <h4>Fake QuickBooks Domain</h4>
+          <p>"quickbooks-billing.com" is not owned by Intuit. The real domain is quickbooks.intuit.com. Always check the sender's domain carefully.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x274C;</span>
+        <div class="flag-content">
+          <h4>No Specific Details</h4>
+          <p>No company name, no product details, no dates. A real invoice references specific services rendered and specific dates of service.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F4E3;</span>
+        <div class="flag-content">
+          <h4>Unverified Sender</h4>
+          <p>If you don't recognize an invoice, contact your finance team directly (don't reply to the email). Never pay an unsolicited invoice.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

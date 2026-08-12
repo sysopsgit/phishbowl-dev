@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CEO Fraud - PhishAware</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a href="index.html" class="back-link">&larr; Back to Gallery</a>
+
+  <div class="detail-container">
+    <h1>"CEO Wire Transfer" BEC Attack</h1>
+    <span class="severity high">High Severity</span>
+
+    <div class="email-sim">
+      <div class="email-header">
+        <div class="field"><span class="label">From:</span> <span class="value">John Smith &lt;john.smith@company-mall.com&gt;</span> <span class="sus">SUSPICIOUS</span></div>
+        <div class="field"><span class="label">Subject:</span> <span class="value">Urgent wire transfer needed</span></div>
+        <div class="field"><span class="label">To:</span> <span class="value">you@yourcompany.com</span></div>
+      </div>
+      <div class="email-body">
+        <p>Hey,</p>
+        <p>I'm in a board meeting and can't take calls right now. Need you to handle something important ASAP.</p>
+        <p>We need to send a <strong>wire transfer of $24,500</strong> to a vendor who&apos;s been waiting on payment. I'll send the bank details once you confirm you can process this today.</p>
+        <p>Text me on <span class="highlight-red">+1 (555) 123-4567</span> — it&apos;s my personal cell for today since I'm out of office.</p>
+        <p style="margin-top:16px;">Thanks,<br><strong>John Smith</strong><br>CEO, YourCompany Inc.</p>
+      </div>
+    </div>
+
+    <div class="red-flags">
+      <h2>Red Flags to Look For</h2>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F575;</span>
+        <div class="flag-content">
+          <h4>Impersonation of Executive (BEC)</h4>
+          <p>Business Email Compromise. The attacker pretends to be the CEO/CFO. Note the fake domain "company-mall.com" — attackers register lookalike domains.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F4B8;</span>
+        <div class="flag-content">
+          <h4>Urgent Financial Request</h4>
+          <p>"Can't take calls" + "wire money now" is a textbook red flag. Always verify wire transfer requests through a second channel (a phone call, a known number).</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F4F1;</span>
+        <div class="flag-content">
+          <h4>Requests Communication Outside Official Channels</h4>
+          <p>Asking you to text a personal cell number is a way to bypass company security policies and monitoring. Always use official communication channels.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F512;</span>
+        <div class="flag-content">
+          <h4>Avoids Standard Process</h4>
+          <p>"Send bank details later" — real financial processes follow strict approval workflows. No legitimate executive asks to bypass procurement/payment procedures.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F4E7;</span>
+        <div class="flag-content">
+          <h4>Lookalike Domain</h4>
+          <p>"company-mall.com" mimics a real company domain. Always check the exact spelling of the sender's domain before acting on sensitive requests.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

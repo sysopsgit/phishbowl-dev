@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delivery Scam - PhishAware</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a href="index.html" class="back-link">&larr; Back to Gallery</a>
+
+  <div class="detail-container">
+    <h1>"Customs Fee" Package Delivery Scam</h1>
+    <span class="severity medium">Medium Severity</span>
+
+    <div class="email-sim">
+      <div class="email-header">
+        <div class="field"><span class="label">From:</span> <span class="value">FedEx Delivery &lt;noreply@fedex-track.com&gt;</span> <span class="sus">SUSPICIOUS</span></div>
+        <div class="field"><span class="label">Subject:</span> <span class="value">Your package #FDX9281 is held at customs</span></div>
+        <div class="field"><span class="label">To:</span> <span class="value">you@yourcompany.com</span></div>
+      </div>
+      <div class="email-body">
+        <div class="logo-area">
+          <div class="fake-logo">&#x1F4E6; FedEx</div>
+        </div>
+
+        <p>Dear Customer,</p>
+        <p>Your shipment <strong>#FDX9281</strong> has arrived at the international sorting facility but is currently <span class="highlight-red">held at customs</span> due to unpaid import duties.</p>
+        <p>A small customs processing fee of <strong>$2.99</strong> is required to release your package. The package contains:</p>
+        <ul>
+          <li>1x Electronic Device</li>
+          <li>Weight: 1.2 kg</li>
+          <li>Estimated delivery: Tomorrow by 5:00 PM</li>
+        </ul>
+        <div class="fake-btn">Pay Customs Fee ($2.99)</div>
+        <p style="color:#666;font-size:0.82rem;">You will be redirected to our secure payment portal.</p>
+      </div>
+    </div>
+
+    <div class="red-flags">
+      <h2>Red Flags to Look For</h2>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F4B3;</span>
+        <div class="flag-content">
+          <h4>Small Amount to Bypass Suspicion</h4>
+          <p>$2.99 seems too small to be a scam — that&apos;s intentional. The real target is your credit card details and personal information entered on the fake payment page.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F310;</span>
+        <div class="flag-content">
+          <h4>Spoofed Domain</h4>
+          <p>"fedex-track.com" is not an official FedEx domain (which is fedex.com). Tracking links from delivery companies should always use their main domain.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F4E6;</span>
+        <div class="flag-content">
+          <h4>Vague Package Details</h4>
+          <p>"1x Electronic Device" with no brand, no model, no order number. Real delivery notifications include specific tracking numbers you can verify on the official site.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F6A8;</span>
+        <div class="flag-content">
+          <h4>Were You Expecting a Package?</h4>
+          <p>If you haven't ordered anything, you won't have customs fees. These scams are sent in bulk hoping to catch people who happen to be expecting a delivery.</p>
+        </div>
+      </div>
+
+      <div class="flag">
+        <span class="flag-icon">&#x1F50D;</span>
+        <div class="flag-content">
+          <h4>Always Check Tracking Independently</h4>
+          <p>Go directly to fedex.com and enter any tracking number manually. Never click links in unsolicited delivery emails — they lead to fake login/payment pages.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

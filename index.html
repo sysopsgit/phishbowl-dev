@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishAware - Spot the Scam</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <h1>PhishAware</h1>
+    <p class="tagline">Real-world phishing email examples. Learn to spot them before you fall for them.</p>
+  </header>
+
+  <div class="controls">
+    <div class="filter-bar">
+      <span class="filter-label">Filter by category:</span>
+      <label class="radio"><input type="radio" name="category" value="all" checked onchange="renderGallery()"> All</label>
+      <label class="radio"><input type="radio" name="category" value="credential-theft" onchange="renderGallery()"> Credential Theft</label>
+      <label class="radio"><input type="radio" name="category" value="invoice-fraud" onchange="renderGallery()"> Invoice Fraud</label>
+      <label class="radio"><input type="radio" name="category" value="ceo-impersonation" onchange="renderGallery()"> Impersonation</label>
+      <label class="radio"><input type="radio" name="category" value="delivery-scam" onchange="renderGallery()"> Delivery Scam</label>
+    </div>
+    <button class="upload-toggle" id="uploadBtn" style="display:none" onclick="toggleUpload()">+ Upload Example</button>
+  </div>
+
+  <div class="upload-panel" id="uploadPanel">
+    <h3>Upload a Phishing Example</h3>
+    <div class="upload-form">
+      <div class="form-group">
+        <label>Category</label>
+        <select id="uploadCat">
+          <option value="credential-theft">Credential Theft</option>
+          <option value="invoice-fraud">Invoice Fraud</option>
+          <option value="ceo-impersonation">Impersonation</option>
+          <option value="delivery-scam">Delivery Scam</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" id="uploadTitle" placeholder='e.g. "PayPal Suspicious Login"'>
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="uploadDesc" placeholder="Brief description of the attack...">
+      </div>
+      <div class="form-group">
+        <label>Upload Screenshot</label>
+        <input type="file" id="uploadImage" accept="image/*">
+        <div class="image-preview" id="imagePreview"></div>
+      </div>
+      <div class="form-group">
+        <label>Red Flags (one per line)</label>
+        <textarea id="uploadFlags" rows="3" placeholder="Suspicious sender domain&#10;Creates false urgency&#10;Contains fake login link"></textarea>
+      </div>
+      <button class="upload-submit" onclick="addEntry()">Add to Gallery</button>
+    </div>
+  </div>
+
+  <main class="gallery" id="gallery"></main>
+
+  <footer>
+    <p>Educational resource. All emails shown are simulated examples for training purposes. Uploaded images are stored only in your browser.</p>
+    <p class="admin-links">
+      <span id="adminLogin" style="display:inline"><a href="#" onclick="adminLogin(); return false;">Admin Login</a></span>
+      <span id="adminLogout" style="display:none"><a href="#" onclick="adminLogout(); return false;">Admin Logout</a></span>
+    </p>
+  </footer>
+
+  <div class="modal-overlay" id="modal" onclick="closeModal(event)">
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+
+  <script src="gallery.js"></script>
+</body>
+</html>
