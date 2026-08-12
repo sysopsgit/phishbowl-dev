@@ -52,31 +52,20 @@ var builtIn = [
   },
   {
     id: "builtin-3",
-    category: "ceo-impersonation",
+    category: "impersonation",
     title: '"CEO Wire Transfer" Scam',
-    badge: "CEO Impersonation",
+    badge: "IMPERSONATION",
     severity: "high",
     tags: ["BEC Attack", "Social Engineering"],
     link: "ceo-fraud.html",
     preview: '<div class="mock-from">John Smith &lt;john.smith@company-mall.com&gt;</div><div class="mock-subject">Urgent wire transfer needed</div><div class="mock-body">I\'m in a meeting and can\'t talk. Need you to process a wire transfer to a vendor ASAP. Send me your mobile number...</div>'
-  },
-  {
-    id: "builtin-4",
-    category: "delivery-scam",
-    title: '"Customs Fee" Scam',
-    badge: "Delivery Scam",
-    severity: "medium",
-    tags: ["Shipping Fraud", "Payment Scam"],
-    link: "package-delivery.html",
-    preview: '<div class="mock-from">FedEx Delivery &lt;noreply@fedex-track.com&gt;</div><div class="mock-subject">Your package #FDX9281 is held at customs</div><div class="mock-body">Your shipment has been delayed. Pay the customs fee of $2.99 to release your package...</div><div class="mock-btn">Pay Customs Fee</div>'
   }
 ];
 
 var categoryLabels = {
   "credential-theft": "Credential Theft",
   "invoice-fraud": "Invoice Fraud",
-  "ceo-impersonation": "Impersonation",
-  "delivery-scam": "Delivery Scam"
+  "impersonation": "IMPERSONATION"
 };
 
 function loadUploaded() {
@@ -161,7 +150,7 @@ function addEntry() {
       category: cat,
       title: title,
       badge: categoryLabels[cat] || cat,
-      severity: cat === "credential-theft" || cat === "invoice-fraud" ? "critical" : cat === "ceo-impersonation" ? "high" : "medium",
+      severity: cat === "credential-theft" || cat === "invoice-fraud" ? "critical" : "high",
       tags: flags.length ? flags : ["User Submitted"],
       image: reader.result,
       description: desc,
