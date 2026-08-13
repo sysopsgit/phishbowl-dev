@@ -3,26 +3,30 @@ var ADMIN_EMAIL = "shivam.dungahu@datafortune.com";
 
 function extractEmail(data) {
   if (!data) return null;
+  if (Array.isArray(data)) data = data[0] || null;
+  if (!data) return null;
+  if (typeof data.user_id === "string" && data.user_id.indexOf("@") !== -1) {
+    return data.user_id;
+  }
   if (data.clientPrincipal && data.clientPrincipal.userDetails) {
     return data.clientPrincipal.userDetails;
   }
   if (data.user_claims && data.user_claims.length) {
     for (var i = 0; i < data.user_claims.length; i++) {
-      var typ = data.user_claims[i].typ || "";
-      if (typ === "preferred_username" || typ.indexOf("emailaddress") !== -1 || typ === "email") {
-        return data.user_claims[i].val;
+      var c = data.user_claims[i];
+      var typ = (c.typ || "").toLowerCase();
+      var val = c.val || "";
+      if (typ.indexOf("email") !== -1 || typ.indexOf("upn") !== -1 || typ === "preferred_username") {
+        if (val.indexOf("@") !== -1) return val;
       }
     }
-  }
-  if (data.user_id && data.user_id.indexOf("@") !== -1) {
-    return data.user_id;
   }
   return null;
 }
 
 function isAdmin() {
   var email = extractEmail(clientPrincipal);
-  return email && email.toLowerCase() === ADMIN_EMAIL;
+  return !!(email && email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
 }
 
 function updateAdminUI() {
@@ -38,11 +42,13 @@ function loadIdentity() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       clientPrincipal = data || null;
+      console.log("[PhishBowl] identity:", clientPrincipal ? "loaded" : "empty", "| email:", extractEmail(clientPrincipal), "| isAdmin:", isAdmin());
       updateAdminUI();
       renderGallery();
     })
-    .catch(function() {
+    .catch(function(err) {
       clientPrincipal = null;
+      console.log("[PhishBowl] identity fetch failed:", err);
       updateAdminUI();
       renderGallery();
     });
