@@ -1,19 +1,14 @@
 {
-  "auth": {
-    "identityProviders": {
-      "microsoftEntra": {
-        "registration": {
-          "openIdIssuer": "https://login.microsoftonline.com/7d2f2039-726e-411b-8369-4755df0eaa8c/v2.0",
-          "clientIdSettingName": "MICROSOFT_PROVIDER_AUTHENTICATION_CLIENT_ID",
-          "clientSecretSettingName": "MICROSOFT_PROVIDER_AUTHENTICATION_SECRET"
-        }
-      }
-    }
-  },
   "routes": [
     {
       "route": "/*",
       "allowedRoles": ["authenticated"]
     }
-  ]
+  ],
+  "responseOverrides": {
+    "401": {
+      "redirect": "/.auth/login/aad",
+      "statusCode": 302
+    }
+  }
 }
