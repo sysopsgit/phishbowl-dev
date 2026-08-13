@@ -1,8 +1,28 @@
 var clientPrincipal = null;
 var ADMIN_EMAIL = "shivam.dungahu@datafortune.com";
 
+function extractEmail(data) {
+  if (!data) return null;
+  if (data.clientPrincipal && data.clientPrincipal.userDetails) {
+    return data.clientPrincipal.userDetails;
+  }
+  if (data.user_claims && data.user_claims.length) {
+    for (var i = 0; i < data.user_claims.length; i++) {
+      var typ = data.user_claims[i].typ || "";
+      if (typ === "preferred_username" || typ.indexOf("emailaddress") !== -1 || typ === "email") {
+        return data.user_claims[i].val;
+      }
+    }
+  }
+  if (data.user_id && data.user_id.indexOf("@") !== -1) {
+    return data.user_id;
+  }
+  return null;
+}
+
 function isAdmin() {
-  return clientPrincipal && clientPrincipal.userDetails && clientPrincipal.userDetails.toLowerCase() === ADMIN_EMAIL;
+  var email = extractEmail(clientPrincipal);
+  return email && email.toLowerCase() === ADMIN_EMAIL;
 }
 
 function updateAdminUI() {
@@ -17,7 +37,7 @@ function loadIdentity() {
   return fetch("/.auth/me")
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      clientPrincipal = data.clientPrincipal || null;
+      clientPrincipal = data || null;
       updateAdminUI();
       renderGallery();
     })
