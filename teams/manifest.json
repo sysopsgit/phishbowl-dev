@@ -2,13 +2,13 @@
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
   "manifestVersion": "1.16",
   "version": "1.0.0",
-  "id": "{{APP_ID}}",
+  "id": "f0b229a4-5efc-4a08-b4b5-00205d8ffc10",
   "packageName": "com.phishbowl.teams",
   "developer": {
     "name": "PhishBowl",
-    "websiteUrl": "{{SITE_URL}}",
-    "privacyUrl": "{{SITE_URL}}/privacy",
-    "termsOfUseUrl": "{{SITE_URL}}/terms"
+    "websiteUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net",
+    "privacyUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net",
+    "termsOfUseUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net"
   },
   "icons": {
     "color": "color.png",
@@ -27,11 +27,11 @@
     {
       "entityId": "gallery",
       "name": "Gallery",
-      "contentUrl": "{{SITE_URL}}",
-      "websiteUrl": "{{SITE_URL}}",
+      "contentUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net",
+      "websiteUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net",
       "scopes": ["personal"]
     }
   ],
   "permissions": ["identity", "messageTeamMembers"],
-  "validDomains": ["{{DOMAIN}}"]
+  "validDomains": ["salmon-plant-0404a2500.7.azurestaticapps.net"]
 }

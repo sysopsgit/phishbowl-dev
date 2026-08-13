@@ -1,32 +1,30 @@
-var ADMIN_PASSWORD = "admin123";
+var clientPrincipal = null;
 
 function isAdmin() {
-  return sessionStorage.getItem("phishaware-admin") === "true";
+  return clientPrincipal && clientPrincipal.userRoles && clientPrincipal.userRoles.indexOf("administrator") !== -1;
 }
 
 function updateAdminUI() {
   var isAuth = isAdmin();
   document.getElementById("uploadBtn").style.display = isAuth ? "" : "none";
-  document.getElementById("adminLogin").style.display = isAuth ? "none" : "inline";
-  document.getElementById("adminLogout").style.display = isAuth ? "inline" : "none";
   if (!isAuth) {
     document.getElementById("uploadPanel").classList.remove("open");
   }
 }
 
-function adminLogin() {
-  var pw = prompt("Enter admin password:");
-  if (pw === ADMIN_PASSWORD) {
-    sessionStorage.setItem("phishaware-admin", "true");
-    updateAdminUI();
-  } else if (pw !== null) {
-    alert("Incorrect password.");
-  }
-}
-
-function adminLogout() {
-  sessionStorage.removeItem("phishaware-admin");
-  updateAdminUI();
+function loadIdentity() {
+  return fetch("/.auth/me")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      clientPrincipal = data.clientPrincipal || null;
+      updateAdminUI();
+      renderGallery();
+    })
+    .catch(function() {
+      clientPrincipal = null;
+      updateAdminUI();
+      renderGallery();
+    });
 }
 
 var builtIn = [
@@ -247,4 +245,4 @@ document.addEventListener("keydown", function(e) {
   }
 });
 
-renderGallery();
+loadIdentity();
