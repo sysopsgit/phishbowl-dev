@@ -1,7 +1,8 @@
 var clientPrincipal = null;
+var ADMIN_EMAIL = "shivam.dungahu@datafortune.com";
 
 function isAdmin() {
-  return clientPrincipal && clientPrincipal.userRoles && clientPrincipal.userRoles.indexOf("administrator") !== -1;
+  return clientPrincipal && clientPrincipal.userDetails && clientPrincipal.userDetails.toLowerCase() === ADMIN_EMAIL;
 }
 
 function updateAdminUI() {
