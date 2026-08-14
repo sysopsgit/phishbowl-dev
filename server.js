@@ -123,7 +123,8 @@ var server = http.createServer(function (req, res) {
           tags: payload.tags || [],
           image: "/uploads/" + filename,
           description: payload.description,
-          flags: payload.flags || []
+          flags: payload.flags || [],
+          date: new Date().toISOString()
         };
         entries.push(entry);
         writeMetadata(entries);

@@ -117,6 +117,14 @@ function getFilteredEntries() {
   return all.filter(function(e) { return e.category === selected; });
 }
 
+function formatDate(iso) {
+  if (!iso) return "";
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return d.getDate() + " " + months[d.getMonth()] + " " + d.getFullYear();
+}
+
 function renderGallery() {
   var entries = getFilteredEntries();
   var html = "";
@@ -133,6 +141,9 @@ function renderGallery() {
 
     html += '<a ' + cardClick + ' class="card" data-category="' + e.category + '">';
     html += '<div class="card-badge ' + e.severity + '">' + e.badge + '</div>';
+    if (!isBuiltin && e.date) {
+      html += '<div class="card-date">' + formatDate(e.date) + '</div>';
+    }
     html += '<div class="card-image email-preview">' + imageContent + '</div>';
     html += '<div class="card-info"><h3>' + e.title + '</h3>';
     for (var t = 0; t < e.tags.length; t++) {

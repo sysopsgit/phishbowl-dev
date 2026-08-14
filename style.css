@@ -271,6 +271,20 @@ body {
 .card-badge.high { background: var(--orange); color: #000; }
 .card-badge.medium { background: var(--yellow); color: #000; }
 
+.card-date {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba(63, 185, 80, 0.18);
+  color: var(--green);
+  border: 1px solid rgba(63, 185, 80, 0.35);
+  z-index: 2;
+}
+
 .card-image {
   position: relative;
   padding: 24px 20px 16px;
