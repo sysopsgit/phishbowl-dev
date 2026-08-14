@@ -42,15 +42,11 @@ function loadIdentity() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       clientPrincipal = data || null;
-      console.log("[PhishBowl] identity:", clientPrincipal ? "loaded" : "empty", "| email:", extractEmail(clientPrincipal), "| isAdmin:", isAdmin());
       updateAdminUI();
-      renderGallery();
     })
-    .catch(function(err) {
+    .catch(function() {
       clientPrincipal = null;
-      console.log("[PhishBowl] identity fetch failed:", err);
       updateAdminUI();
-      renderGallery();
     });
 }
 
@@ -93,21 +89,21 @@ var categoryLabels = {
   "impersonation": "IMPERSONATION"
 };
 
-function loadUploaded() {
-  try {
-    var raw = localStorage.getItem("phishaware-uploads");
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
-}
+var uploadedEntries = [];
 
-function saveUploaded(entries) {
-  localStorage.setItem("phishaware-uploads", JSON.stringify(entries));
+function loadUploads() {
+  return fetch("/api/uploads")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      uploadedEntries = Array.isArray(data) ? data : [];
+    })
+    .catch(function() {
+      uploadedEntries = [];
+    });
 }
 
 function getAllEntries() {
-  return builtIn.concat(loadUploaded());
+  return builtIn.concat(uploadedEntries);
 }
 
 function getFilteredEntries() {
@@ -169,9 +165,7 @@ function addEntry() {
   var reader = new FileReader();
   reader.onload = function() {
     var flags = flagsRaw ? flagsRaw.split("\n").map(function(f) { return f.trim(); }).filter(Boolean) : [];
-    var entries = loadUploaded();
-    var newEntry = {
-      id: "upload-" + Date.now(),
+    var payload = {
       category: cat,
       title: title,
       badge: categoryLabels[cat] || cat,
@@ -181,18 +175,31 @@ function addEntry() {
       description: desc,
       flags: flags
     };
-    entries.push(newEntry);
-    saveUploaded(entries);
 
-    document.getElementById("uploadTitle").value = "";
-    document.getElementById("uploadDesc").value = "";
-    document.getElementById("uploadFlags").value = "";
-    fileInput.value = "";
-    document.getElementById("imagePreview").innerHTML = "";
-    document.getElementById("uploadPanel").classList.remove("open");
-
-updateAdminUI();
-renderGallery();
+    fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r) {
+      return r.json().then(function(d) {
+        if (!r.ok) { throw new Error(d.error || "Upload failed"); }
+        return d;
+      });
+    })
+    .then(function(entry) {
+      uploadedEntries.push(entry);
+      document.getElementById("uploadTitle").value = "";
+      document.getElementById("uploadDesc").value = "";
+      document.getElementById("uploadFlags").value = "";
+      fileInput.value = "";
+      document.getElementById("imagePreview").innerHTML = "";
+      document.getElementById("uploadPanel").classList.remove("open");
+      renderGallery();
+    })
+    .catch(function(err) {
+      alert("Upload failed: " + err.message);
+    });
   };
   reader.readAsDataURL(file);
 }
@@ -214,10 +221,9 @@ document.getElementById("uploadImage").addEventListener("change", function() {
 });
 
 function openUploadedModal(id) {
-  var entries = loadUploaded();
   var entry = null;
-  for (var i = 0; i < entries.length; i++) {
-    if (entries[i].id === id) { entry = entries[i]; break; }
+  for (var i = 0; i < uploadedEntries.length; i++) {
+    if (uploadedEntries[i].id === id) { entry = uploadedEntries[i]; break; }
   }
   if (!entry) return;
 
@@ -253,11 +259,21 @@ function openUploadedModal(id) {
 
 function deleteEntry(id) {
   if (!confirm("Delete this uploaded example?")) return;
-  var entries = loadUploaded();
-  entries = entries.filter(function(e) { return e.id !== id; });
-  saveUploaded(entries);
-  document.getElementById("modal").classList.remove("open");
-  renderGallery();
+  fetch("/api/uploads/" + encodeURIComponent(id), { method: "DELETE" })
+    .then(function(r) {
+      return r.json().then(function(d) {
+        if (!r.ok) { throw new Error(d.error || "Delete failed"); }
+        return d;
+      });
+    })
+    .then(function() {
+      uploadedEntries = uploadedEntries.filter(function(e) { return e.id !== id; });
+      document.getElementById("modal").classList.remove("open");
+      renderGallery();
+    })
+    .catch(function(err) {
+      alert("Delete failed: " + err.message);
+    });
 }
 
 function closeModal(e) {
@@ -272,4 +288,12 @@ document.addEventListener("keydown", function(e) {
   }
 });
 
-loadIdentity();
+function init() {
+  Promise.all([loadIdentity(), loadUploads()]).then(function() {
+    renderGallery();
+  }).catch(function() {
+    renderGallery();
+  });
+}
+
+init();
