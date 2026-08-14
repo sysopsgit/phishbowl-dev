@@ -121,6 +121,15 @@
     <div class="modal-content" id="modalContent"></div>
   </div>
 
+  <div class="auth-overlay" id="authOverlay" style="display:none;">
+    <div class="auth-box">
+      <div class="brand-mark" style="margin:0 auto 16px;">P</div>
+      <h2 id="authTitle">Sign in required</h2>
+      <p id="authMessage">Please sign in with your organisation account to view the gallery.</p>
+      <button class="signin-btn" id="signinBtn" onclick="signIn()">Sign in with Microsoft</button>
+    </div>
+  </div>
+
   <script src="gallery.js"></script>
 </body>
 </html>

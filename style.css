@@ -975,6 +975,56 @@ footer {
 
 .modal-content h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; }
 
+/* ===== AUTH OVERLAY ===== */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+
+.auth-box {
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  padding: 32px 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+.auth-box h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.auth-box p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.signin-btn {
+  padding: 10px 24px;
+  background: var(--brand-gradient);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signin-btn:hover {
+  filter: brightness(1.1);
+}
+
 @media (max-width: 768px) {
   .gallery { grid-template-columns: 1fr; padding: 16px 16px 32px; }
   .topbar-inner { padding: 0 16px; }

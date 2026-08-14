@@ -3,35 +3,35 @@
   "manifestVersion": "1.16",
   "version": "1.0.0",
   "id": "f0b229a4-5efc-4a08-b4b5-00205d8ffc10",
-  "packageName": "com.phishbowl.teams",
+  "packageName": "com.phishaware.teams",
   "developer": {
-    "name": "PhishBowl",
-    "websiteUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net",
-    "privacyUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net",
-    "termsOfUseUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net"
+    "name": "PhishAware",
+    "websiteUrl": "https://df-phishbowl-ehgtauepgqavgcff.centralindia-01.azurewebsites.net",
+    "privacyUrl": "https://df-phishbowl-ehgtauepgqavgcff.centralindia-01.azurewebsites.net",
+    "termsOfUseUrl": "https://df-phishbowl-ehgtauepgqavgcff.centralindia-01.azurewebsites.net"
   },
   "icons": {
-    "color": "color.png",
-    "outline": "outline.png"
+    "color": "phishbowl.png",
+    "outline": "phishbowl-outline.png"
   },
   "name": {
-    "short": "PhishBowl",
-    "full": "PhishBowl - Phishing Awareness"
+    "short": "PhishAware",
+    "full": "PhishAware - Security Awareness"
   },
   "description": {
     "short": "Phishing awareness training gallery",
-    "full": "Educational resource showcasing real-world phishing email examples. Learn to spot credential theft, invoice fraud, impersonation attacks and more before you fall for them."
+    "full": "Real-world phishing email examples that target our organisation. Learn to recognise credential theft, invoice fraud and impersonation attacks before you fall for them."
   },
-  "accentColor": "#6E40C9",
+  "accentColor": "#1E5796",
   "staticTabs": [
     {
       "entityId": "gallery",
       "name": "Gallery",
-      "contentUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net",
-      "websiteUrl": "https://salmon-plant-0404a2500.7.azurestaticapps.net",
+      "contentUrl": "https://df-phishbowl-ehgtauepgqavgcff.centralindia-01.azurewebsites.net",
+      "websiteUrl": "https://df-phishbowl-ehgtauepgqavgcff.centralindia-01.azurewebsites.net",
       "scopes": ["personal"]
     }
   ],
   "permissions": ["identity", "messageTeamMembers"],
-  "validDomains": ["salmon-plant-0404a2500.7.azurestaticapps.net"]
+  "validDomains": ["df-phishbowl-ehgtauepgqavgcff.centralindia-01.azurewebsites.net"]
 }
