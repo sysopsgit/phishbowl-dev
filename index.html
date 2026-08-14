@@ -3,13 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PhishAware - Spot the Scam</title>
+  <title>PhishAware - Security Awareness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
 </head>
 <body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark">P</span>
+        <span class="brand-name">PhishAware</span>
+      </a>
+      <div class="topnav-right">
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark mode">
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+        <button class="upload-toggle" id="uploadBtn" style="display:none" onclick="toggleUpload()">+ Upload Example</button>
+      </div>
+    </div>
+  </header>
+
   <header class="hero">
-    <h1>PhishAware</h1>
-    <p class="tagline">Real-world phishing email examples. Learn to spot them before you fall for them.</p>
+    <div class="hero-inner">
+      <p class="eyebrow">Security Awareness</p>
+      <h1>Phishing Examples Gallery</h1>
+      <p class="tagline">Real-world phishing emails that target our organisation on a daily basis — learn to recognise and stop them.</p>
+      <div class="fish-scene" aria-hidden="true">
+        <svg viewBox="0 0 320 130" class="fish-animation">
+          <g class="hook-group">
+            <line x1="160" y1="0" x2="160" y2="28" class="hook-line"/>
+            <path d="M160 28 C160 50 180 54 182 42" class="hook-curve"/>
+            <g class="bait">
+              <rect x="168" y="42" width="28" height="19" rx="3" class="bait-rect"/>
+              <path d="M168 45 L182 53 L196 45" class="bait-flap"/>
+              <circle cx="194" cy="45" r="3.5" class="bait-dot"/>
+            </g>
+          </g>
+
+          <g class="fish-a">
+            <polygon points="46,82 32,73 32,91" class="fish-tail"/>
+            <ellipse cx="70" cy="82" rx="22" ry="13" class="fish-body"/>
+            <circle cx="84" cy="78" r="2.5" class="fish-eye"/>
+          </g>
+
+          <g class="fish-b">
+            <polygon points="46,82 32,73 32,91" class="fish-tail"/>
+            <ellipse cx="70" cy="82" rx="22" ry="13" class="fish-body"/>
+            <circle cx="84" cy="78" r="2.5" class="fish-eye"/>
+          </g>
+
+          <g class="fish-c">
+            <polygon points="46,82 32,73 32,91" class="fish-tail"/>
+            <ellipse cx="70" cy="82" rx="22" ry="13" class="fish-body"/>
+            <circle cx="84" cy="78" r="2.5" class="fish-eye"/>
+          </g>
+
+          <line x1="0" y1="106" x2="320" y2="106" class="water-line"/>
+        </svg>
+      </div>
+    </div>
   </header>
 
   <div class="controls">
@@ -20,7 +76,6 @@
       <label class="radio"><input type="radio" name="category" value="invoice-fraud" onchange="renderGallery()"> Invoice Fraud</label>
       <label class="radio"><input type="radio" name="category" value="impersonation" onchange="renderGallery()"> IMPERSONATION</label>
     </div>
-    <button class="upload-toggle" id="uploadBtn" style="display:none" onclick="toggleUpload()">+ Upload Example</button>
   </div>
 
   <div class="upload-panel" id="uploadPanel">
@@ -47,9 +102,10 @@
         <input type="file" id="uploadImage" accept="image/*">
         <div class="image-preview" id="imagePreview"></div>
       </div>
-      <div class="form-group">
-        <label>Red Flags (one per line)</label>
-        <textarea id="uploadFlags" rows="3" placeholder="Suspicious sender domain&#10;Creates false urgency&#10;Contains fake login link"></textarea>
+      <div class="form-group flag-group">
+        <label>Red Flags</label>
+        <div id="flagsContainer"></div>
+        <button type="button" class="add-flag-btn" onclick="addFlagRow()">+ Add Red Flag</button>
       </div>
       <button class="upload-submit" onclick="addEntry()">Add to Gallery</button>
     </div>

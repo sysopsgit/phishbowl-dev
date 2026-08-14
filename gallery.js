@@ -162,26 +162,63 @@ function toggleUpload() {
   panel.classList.toggle("open");
 }
 
+function addFlagRow() {
+  var container = document.getElementById("flagsContainer");
+  var row = document.createElement("div");
+  row.className = "flag-row";
+  row.innerHTML = '<div class="flag-row-head"><input type="text" class="flag-title-input" placeholder="Title (e.g. Spoofed Sender Domain)"><button type="button" class="flag-remove" onclick="removeFlagRow(this)" title="Remove">&#215;</button></div><textarea class="flag-desc-input" rows="2" placeholder="Description (e.g. The sender\'s email domain is not an official domain...)"></textarea>';
+  container.appendChild(row);
+}
+
+function removeFlagRow(btn) {
+  var row = btn.closest(".flag-row");
+  if (row) row.remove();
+}
+
+function collectFlags() {
+  var rows = document.querySelectorAll("#flagsContainer .flag-row");
+  var flags = [];
+  for (var i = 0; i < rows.length; i++) {
+    var title = rows[i].querySelector(".flag-title-input").value.trim();
+    var desc = rows[i].querySelector(".flag-desc-input").value.trim();
+    if (title || desc) {
+      flags.push({ title: title || "Red Flag", description: desc });
+    }
+  }
+  return flags;
+}
+
+function clearFlagRows() {
+  var container = document.getElementById("flagsContainer");
+  container.innerHTML = "";
+}
+
 function addEntry() {
   var cat = document.getElementById("uploadCat").value;
   var title = document.getElementById("uploadTitle").value.trim();
   var desc = document.getElementById("uploadDesc").value.trim();
-  var flagsRaw = document.getElementById("uploadFlags").value.trim();
   var fileInput = document.getElementById("uploadImage");
   var file = fileInput.files[0];
 
   if (!title) { alert("Please enter a title."); return; }
   if (!file) { alert("Please select an image to upload."); return; }
 
+  var flags = collectFlags();
+
   var reader = new FileReader();
   reader.onload = function() {
-    var flags = flagsRaw ? flagsRaw.split("\n").map(function(f) { return f.trim(); }).filter(Boolean) : [];
+    var tagList = [];
+    for (var i = 0; i < flags.length; i++) {
+      if (flags[i].title) { tagList.push(flags[i].title); }
+    }
+    if (!tagList.length) { tagList = ["User Submitted"]; }
+
     var payload = {
       category: cat,
       title: title,
       badge: categoryLabels[cat] || cat,
       severity: cat === "credential-theft" || cat === "invoice-fraud" ? "critical" : "high",
-      tags: flags.length ? flags : ["User Submitted"],
+      tags: tagList,
       image: reader.result,
       description: desc,
       flags: flags
@@ -202,9 +239,9 @@ function addEntry() {
       uploadedEntries.push(entry);
       document.getElementById("uploadTitle").value = "";
       document.getElementById("uploadDesc").value = "";
-      document.getElementById("uploadFlags").value = "";
       fileInput.value = "";
       document.getElementById("imagePreview").innerHTML = "";
+      clearFlagRows();
       document.getElementById("uploadPanel").classList.remove("open");
       renderGallery();
     })
@@ -240,9 +277,19 @@ function openUploadedModal(id) {
 
   var flagsHtml = "";
   if (entry.flags && entry.flags.length) {
-    var icons = ["&#x1F4E7;", "&#x23F0;", "&#x26A0;", "&#x1F517;", "&#x1F4DD;"];
     for (var f = 0; f < entry.flags.length; f++) {
-      flagsHtml += '<div class="flag"><span class="flag-icon">' + (icons[f] || "&#x274C;") + '</span><div class="flag-content"><p>' + entry.flags[f] + '</p></div></div>';
+      var fl = entry.flags[f];
+      var flagTitle = "";
+      var flagDesc = "";
+      if (typeof fl === "string") {
+        flagDesc = fl;
+      } else {
+        flagTitle = fl.title || "";
+        flagDesc = fl.description || "";
+      }
+      var body = flagTitle ? ('<h4>' + flagTitle + '</h4>') : '';
+      if (flagDesc) { body += '<p>' + flagDesc + '</p>'; }
+      flagsHtml += '<div class="flag"><span class="flag-icon">&#33;</span><div class="flag-content">' + body + '</div></div>';
     }
   }
 

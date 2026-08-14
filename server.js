@@ -1,6 +1,12 @@
 var http = require("http");
 var fs = require("fs");
 var path = require("path");
+var DatabaseSync = null;
+try {
+  DatabaseSync = require("node:sqlite").DatabaseSync;
+} catch (e) {
+  DatabaseSync = null;
+}
 
 var ADMIN_EMAIL = "shivam.dungahu@datafortune.com";
 
@@ -18,22 +24,19 @@ var contentTypes = {
 };
 
 var dataDir = process.env.HOME ? path.join(process.env.HOME, "data") : path.join(__dirname, "data");
-var uploadDir = path.join(dataDir, "uploads");
-var metadataFile = path.join(dataDir, "uploads.json");
+try { fs.mkdirSync(dataDir, { recursive: true }); } catch (e) {}
 
-try { fs.mkdirSync(uploadDir, { recursive: true }); } catch (e) {}
+var db = null;
+var stmts = {};
 
-function readMetadata() {
-  try {
-    var raw = fs.readFileSync(metadataFile, "utf8");
-    return JSON.parse(raw);
-  } catch (e) {
-    return [];
-  }
-}
-
-function writeMetadata(entries) {
-  fs.writeFileSync(metadataFile, JSON.stringify(entries, null, 2));
+if (DatabaseSync) {
+  db = new DatabaseSync(path.join(dataDir, "phishaware.db"));
+  db.exec("CREATE TABLE IF NOT EXISTS uploads (id TEXT PRIMARY KEY, category TEXT, title TEXT, badge TEXT, severity TEXT, tags TEXT, image BLOB, image_type TEXT, description TEXT, flags TEXT, date TEXT)");
+  stmts.list = db.prepare("SELECT id, category, title, badge, severity, tags, description, flags, date, image_type FROM uploads ORDER BY date DESC");
+  stmts.insert = db.prepare("INSERT INTO uploads (id, category, title, badge, severity, tags, image, image_type, description, flags, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  stmts.getImage = db.prepare("SELECT image, image_type FROM uploads WHERE id = ?");
+  stmts.getMeta = db.prepare("SELECT id, category, title, badge, severity, tags, description, flags, date, image_type FROM uploads WHERE id = ?");
+  stmts.del = db.prepare("DELETE FROM uploads WHERE id = ?");
 }
 
 function getUserEmail(req) {
@@ -42,7 +45,7 @@ function getUserEmail(req) {
 
 function isAdmin(req) {
   var email = getUserEmail(req);
-  return email && email.toLowerCase() === ADMIN_EMAIL;
+  return !!email && email.toLowerCase() === ADMIN_EMAIL;
 }
 
 function sendJson(res, statusCode, obj) {
@@ -67,7 +70,7 @@ function readBody(req, callback) {
   var body = "";
   req.on("data", function (chunk) {
     body += chunk;
-    if (body.length > 20 * 1024 * 1024) {
+    if (body.length > 30 * 1024 * 1024) {
       req.destroy();
       callback(new Error("Payload too large"));
     }
@@ -80,12 +83,28 @@ function readBody(req, callback) {
   });
 }
 
-function guessExt(dataUrl) {
-  var m = dataUrl.match(/^data:image\/(\w+);base64,/);
-  if (m) {
-    return "." + m[1].replace("jpeg", "jpg");
-  }
-  return ".png";
+function safeParse(str, fallback) {
+  try { return JSON.parse(str); } catch (e) { return fallback; }
+}
+
+function guessImageType(dataUrl) {
+  var m = (dataUrl || "").match(/^data:(image\/[a-z0-9.+-]+);base64,/);
+  return m ? m[1] : "image/png";
+}
+
+function rowToEntry(row) {
+  return {
+    id: row.id,
+    category: row.category,
+    title: row.title,
+    badge: row.badge,
+    severity: row.severity,
+    tags: safeParse(row.tags, []),
+    image: "/uploads/" + encodeURIComponent(row.id),
+    description: row.description,
+    flags: safeParse(row.flags, []),
+    date: row.date
+  };
 }
 
 var server = http.createServer(function (req, res) {
@@ -93,42 +112,40 @@ var server = http.createServer(function (req, res) {
 
   // List uploads
   if (urlPath === "/api/uploads" && req.method === "GET") {
-    sendJson(res, 200, readMetadata());
+    if (!db) { sendJson(res, 200, []); return; }
+    var rows = stmts.list.all();
+    sendJson(res, 200, rows.map(rowToEntry));
     return;
   }
 
-  // Upload
+  // Upload (admin only)
   if (urlPath === "/api/upload" && req.method === "POST") {
-    if (!isAdmin(req)) {
-      sendJson(res, 403, { error: "Not authorized" });
-      return;
-    }
+    if (!isAdmin(req)) { sendJson(res, 403, { error: "Not authorized" }); return; }
+    if (!db) { sendJson(res, 500, { error: "Storage unavailable" }); return; }
     readBody(req, function (err, body) {
       if (err) { sendJson(res, 400, { error: "Bad request" }); return; }
       try {
         var payload = JSON.parse(body);
         var id = "upload-" + Date.now();
-        var ext = guessExt(payload.image || "");
-        var filename = id + ext;
-        var imageBuffer = Buffer.from((payload.image || "").replace(/^data:image\/\w+;base64,/, ""), "base64");
-        fs.writeFileSync(path.join(uploadDir, filename), imageBuffer);
+        var imageType = guessImageType(payload.image);
+        var imageBuffer = Buffer.from((payload.image || "").replace(/^data:image\/[a-z0-9.+-]+;base64,/, ""), "base64");
 
-        var entries = readMetadata();
-        var entry = {
-          id: id,
-          category: payload.category,
-          title: payload.title,
-          badge: payload.badge,
-          severity: payload.severity,
-          tags: payload.tags || [],
-          image: "/uploads/" + filename,
-          description: payload.description,
-          flags: payload.flags || [],
-          date: new Date().toISOString()
-        };
-        entries.push(entry);
-        writeMetadata(entries);
-        sendJson(res, 200, entry);
+        stmts.insert.run(
+          id,
+          payload.category || "",
+          payload.title || "",
+          payload.badge || "",
+          payload.severity || "medium",
+          JSON.stringify(payload.tags || []),
+          imageBuffer,
+          imageType,
+          payload.description || "",
+          JSON.stringify(payload.flags || []),
+          new Date().toISOString()
+        );
+
+        var row = stmts.getMeta.get(id);
+        sendJson(res, 200, rowToEntry(row));
       } catch (e) {
         sendJson(res, 400, { error: "Invalid payload" });
       }
@@ -136,29 +153,29 @@ var server = http.createServer(function (req, res) {
     return;
   }
 
-  // Delete upload
+  // Delete upload (admin only)
   if (urlPath.indexOf("/api/uploads/") === 0 && req.method === "DELETE") {
-    if (!isAdmin(req)) {
-      sendJson(res, 403, { error: "Not authorized" });
-      return;
-    }
+    if (!isAdmin(req)) { sendJson(res, 403, { error: "Not authorized" }); return; }
+    if (!db) { sendJson(res, 500, { error: "Storage unavailable" }); return; }
     var id = decodeURIComponent(urlPath.split("/").pop());
-    var entries = readMetadata();
-    var found = null;
-    for (var i = 0; i < entries.length; i++) {
-      if (entries[i].id === id) { found = entries[i]; break; }
-    }
+    var found = stmts.getMeta.get(id);
     if (!found) { sendJson(res, 404, { error: "Not found" }); return; }
-    try { fs.unlinkSync(path.join(uploadDir, path.basename(found.image))); } catch (e) {}
-    entries = entries.filter(function (e) { return e.id !== id; });
-    writeMetadata(entries);
+    stmts.del.run(id);
     sendJson(res, 200, { ok: true });
     return;
   }
 
-  // Serve uploaded images
+  // Serve uploaded image
   if (urlPath.indexOf("/uploads/") === 0) {
-    serveFile(res, path.join(uploadDir, path.basename(urlPath)));
+    if (!db) { res.writeHead(404); res.end("Not Found"); return; }
+    var imgId = decodeURIComponent(urlPath.split("/").pop());
+    var row = stmts.getImage.get(imgId);
+    if (!row) { res.writeHead(404, { "Content-Type": "text/plain" }); res.end("Not Found"); return; }
+    res.writeHead(200, {
+      "Content-Type": row.image_type || "image/png",
+      "Cache-Control": "public, max-age=31536000, immutable"
+    });
+    res.end(Buffer.from(row.image));
     return;
   }
 
@@ -171,5 +188,5 @@ var server = http.createServer(function (req, res) {
 
 var port = process.env.PORT || 3000;
 server.listen(port, function () {
-  console.log("Static server running on port " + port);
+  console.log("Static server running on port " + port + (db ? " (SQLite ready)" : " (SQLite unavailable)"));
 });
