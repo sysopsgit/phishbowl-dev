@@ -450,7 +450,8 @@ body {
 }
 
 .upload-panel.open {
-  max-height: 700px;
+  max-height: 80vh;
+  overflow-y: auto;
   margin-bottom: 8px;
 }
 
