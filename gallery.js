@@ -240,8 +240,9 @@ function openUploadedModal(id) {
 
   var flagsHtml = "";
   if (entry.flags && entry.flags.length) {
+    var icons = ["&#x1F4E7;", "&#x23F0;", "&#x26A0;", "&#x1F517;", "&#x1F4DD;"];
     for (var f = 0; f < entry.flags.length; f++) {
-      flagsHtml += '<div class="flag"><span class="flag-icon">&#33;</span><div class="flag-content"><p>' + entry.flags[f] + '</p></div></div>';
+      flagsHtml += '<div class="flag"><span class="flag-icon">' + (icons[f] || "&#x274C;") + '</span><div class="flag-content"><p>' + entry.flags[f] + '</p></div></div>';
     }
   }
 
