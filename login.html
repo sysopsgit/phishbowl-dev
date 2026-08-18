@@ -76,17 +76,19 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ access_token: token })
             }).then(function (resp) {
-              log("Exchange response status: " + resp.status);
-              return resp;
+              return resp.text().then(function (txt) {
+                log("Exchange status: " + resp.status + " body: " + txt.substring(0, 200));
+                return { ok: resp.ok, status: resp.status };
+              });
             });
           })
-          .then(function (resp) {
-            if (!resp.ok) {
-              log("FAIL: exchange returned " + resp.status);
-              throw new Error("token exchange HTTP " + resp.status);
+          .then(function (result) {
+            if (!result.ok) {
+              log("FAIL: exchange returned " + result.status);
+              throw new Error("token exchange HTTP " + result.status);
             }
-            log("Exchange OK. Reloading to / ...");
-            window.location.href = "/";
+            log("Exchange OK. Reloading in 4s ...");
+            setTimeout(function () { window.location.href = "/"; }, 4000);
           })
           .catch(function (err) {
             log("FAIL: " + errDetail(err));
