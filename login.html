@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
+  <script src="https://res.cdn.office.net/teams-js/2.24.0/js/MicrosoftTeams.min.js"></script>
 </head>
 <body>
   <div class="auth-overlay" style="display:flex;">
@@ -16,30 +17,48 @@
       <div class="brand-mark" style="margin:0 auto 16px;">P</div>
       <h2 id="authTitle">Sign in</h2>
       <p id="authMessage">Sign in with your organisation account to continue.</p>
-      <button class="signin-btn" id="signinBtn" onclick="browserSignIn()">Sign in with Microsoft</button>
+      <button class="signin-btn" id="signinBtn" style="display:none;" onclick="browserSignIn()">Sign in with Microsoft</button>
     </div>
   </div>
 
   <script>
     var params = new URLSearchParams(window.location.search);
     var denied = params.get("denied") === "1";
+    var titleEl = document.getElementById("authTitle");
+    var msgEl = document.getElementById("authMessage");
+    var btnEl = document.getElementById("signinBtn");
 
     function browserSignIn() {
-      var redirect = window.location.origin + "/close.html";
-      var url = "/.auth/login/aad?post_login_redirect_uri=" + encodeURIComponent(redirect);
-      var popup = window.open(url, "phishaware-login", "width=600,height=700");
-      var timer = setInterval(function () {
-        if (!popup || popup.closed) {
-          clearInterval(timer);
-          window.location.href = "/";
-        }
-      }, 500);
+      var redirect = window.location.origin + "/";
+      window.location.href = "/.auth/login/aad?post_login_redirect_uri=" + encodeURIComponent(redirect);
+    }
+
+    function showButton() {
+      msgEl.textContent = "Sign in with your organisation account to continue.";
+      btnEl.style.display = "";
     }
 
     if (denied) {
-      document.getElementById("authTitle").textContent = "Access denied";
-      document.getElementById("authMessage").textContent = "This resource is restricted to organisation accounts only.";
-      document.getElementById("signinBtn").style.display = "none";
+      titleEl.textContent = "Access denied";
+      msgEl.textContent = "This resource is restricted to organisation accounts only.";
+    } else if (window.microsoftTeams && microsoftTeams.app && microsoftTeams.authentication) {
+      microsoftTeams.app.initialize()
+        .then(function () {
+          var authUrl = window.location.origin + "/.auth/login/aad?post_login_redirect_uri=" + encodeURIComponent(window.location.origin + "/");
+          return microsoftTeams.authentication.authenticate({
+            url: authUrl,
+            width: 600,
+            height: 700
+          });
+        })
+        .then(function () {
+          window.location.href = "/";
+        })
+        .catch(function () {
+          showButton();
+        });
+    } else {
+      showButton();
     }
   </script>
 </body>
