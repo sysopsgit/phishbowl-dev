@@ -24,6 +24,14 @@
   <script>
     var params = new URLSearchParams(window.location.search);
     var denied = params.get("denied") === "1";
+    var titleEl = document.getElementById("authTitle");
+    var msgEl = document.getElementById("authMessage");
+    var btnEl = document.getElementById("signinBtn");
+
+    function setStatus(title, msg) {
+      titleEl.textContent = title;
+      msgEl.textContent = msg;
+    }
 
     function browserSignIn() {
       var redirect = window.location.origin + "/";
@@ -31,33 +39,46 @@
     }
 
     function showButton() {
-      document.getElementById("authMessage").textContent = "Sign in with your organisation account to continue.";
-      document.getElementById("signinBtn").style.display = "";
+      btnEl.style.display = "";
+    }
+
+    function errDetail(err) {
+      if (!err) return "unknown error";
+      if (typeof err === "string") return err;
+      if (err.message) return err.message;
+      try { return JSON.stringify(err); } catch (e) { return String(err); }
     }
 
     if (denied) {
-      document.getElementById("authTitle").textContent = "Access denied";
-      document.getElementById("authMessage").textContent = "This resource is restricted to organisation accounts only.";
-    } else if (window.microsoftTeams && microsoftTeams.app && microsoftTeams.authentication) {
+      setStatus("Access denied", "This resource is restricted to organisation accounts only.");
+    } else if (!window.microsoftTeams || !microsoftTeams.app || !microsoftTeams.authentication) {
+      setStatus("Sign in", "Teams SDK not available. Sign in with your organisation account to continue.");
+      showButton();
+    } else {
+      setStatus("Signing in", "Initialising Teams SDK...");
       microsoftTeams.app.initialize()
         .then(function () {
+          setStatus("Signing in", "Requesting token from Teams...");
           return microsoftTeams.authentication.getAuthToken();
         })
         .then(function (token) {
+          setStatus("Signing in", "Exchanging token...");
           return fetch("/.auth/login/aad", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ access_token: token })
+          }).then(function (resp) {
+            if (!resp.ok) { throw new Error("token exchange HTTP " + resp.status); }
+            return resp;
           });
         })
         .then(function () {
           window.location.href = "/";
         })
-        .catch(function () {
+        .catch(function (err) {
+          setStatus("Sign in", "Silent sign-in failed: " + errDetail(err));
           showButton();
         });
-    } else {
-      showButton();
     }
   </script>
 </body>
