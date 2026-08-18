@@ -24,7 +24,7 @@
   },
   "accentColor": "#1E5796",
   "webApplicationInfo": {
-    "id": "REPLACE_WITH_TEAMS_APP_CLIENT_ID",
+    "id": "fe277eb4-46f6-450c-b23e-ac557cc5ce35",
     "resource": "api://818ca42c-b927-425e-8ec8-134987c527ed"
   },
   "staticTabs": [
