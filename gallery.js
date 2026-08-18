@@ -29,48 +29,6 @@ function isAdmin() {
   return !!(email && email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
 }
 
-function isAuthenticated() {
-  return !!(clientPrincipal && (clientPrincipal.user_id || clientPrincipal.userDetails || extractEmail(clientPrincipal)));
-}
-
-function isTenantUser() {
-  var email = extractEmail(clientPrincipal);
-  return !!(email && email.toLowerCase().indexOf("@datafortune.com") !== -1);
-}
-
-function showAuthState(state) {
-  var overlay = document.getElementById("authOverlay");
-  if (!overlay) return;
-  var title = document.getElementById("authTitle");
-  var msg = document.getElementById("authMessage");
-  var btn = document.getElementById("signinBtn");
-  if (state === "anonymous") {
-    overlay.style.display = "flex";
-    title.textContent = "Sign in required";
-    msg.textContent = "Please sign in with your organisation account to view the phishing awareness gallery.";
-    btn.style.display = "";
-  } else if (state === "denied") {
-    overlay.style.display = "flex";
-    title.textContent = "Access denied";
-    msg.textContent = "This resource is restricted to organisation accounts only.";
-    btn.style.display = "none";
-  } else {
-    overlay.style.display = "none";
-  }
-}
-
-function signIn() {
-  var redirect = location.origin + "/close.html";
-  var url = "/.auth/login/aad?post_login_redirect_uri=" + encodeURIComponent(redirect);
-  var popup = window.open(url, "phishaware-login", "width=600,height=700");
-  var timer = setInterval(function () {
-    if (!popup || popup.closed) {
-      clearInterval(timer);
-      location.reload();
-    }
-  }, 500);
-}
-
 function updateAdminUI() {
   var isAuth = isAdmin();
   document.getElementById("uploadBtn").style.display = isAuth ? "" : "none";
@@ -84,18 +42,10 @@ function loadIdentity() {
     .then(function(r) { return r.json(); })
     .then(function(data) {
       clientPrincipal = data || null;
-      if (!isAuthenticated()) {
-        showAuthState("anonymous");
-      } else if (!isTenantUser()) {
-        showAuthState("denied");
-      } else {
-        showAuthState("ok");
-      }
       updateAdminUI();
     })
     .catch(function() {
       clientPrincipal = null;
-      showAuthState("anonymous");
       updateAdminUI();
     });
 }

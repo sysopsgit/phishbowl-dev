@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign in - PhishAware</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
+  <script src="https://res.cdn.office.net/teams-js/2.24.0/js/MicrosoftTeams.min.js"></script>
+</head>
+<body>
+  <div class="auth-overlay" style="display:flex;">
+    <div class="auth-box">
+      <div class="brand-mark" style="margin:0 auto 16px;">P</div>
+      <h2 id="authTitle">Sign in</h2>
+      <p id="authMessage">Signing you in with your organisation account&hellip;</p>
+      <button class="signin-btn" id="signinBtn" style="display:none;" onclick="browserSignIn()">Sign in with Microsoft</button>
+    </div>
+  </div>
+
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var denied = params.get("denied") === "1";
+
+    function browserSignIn() {
+      var redirect = window.location.origin + "/";
+      window.location.href = "/.auth/login/aad?post_login_redirect_uri=" + encodeURIComponent(redirect);
+    }
+
+    function showButton() {
+      document.getElementById("authMessage").textContent = "Sign in with your organisation account to continue.";
+      document.getElementById("signinBtn").style.display = "";
+    }
+
+    if (denied) {
+      document.getElementById("authTitle").textContent = "Access denied";
+      document.getElementById("authMessage").textContent = "This resource is restricted to organisation accounts only.";
+    } else if (window.microsoftTeams && microsoftTeams.app && microsoftTeams.authentication) {
+      microsoftTeams.app.initialize()
+        .then(function () {
+          return microsoftTeams.authentication.getAuthToken();
+        })
+        .then(function (token) {
+          return fetch("/.auth/login/aad", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ access_token: token })
+          });
+        })
+        .then(function () {
+          window.location.href = "/";
+        })
+        .catch(function () {
+          showButton();
+        });
+    } else {
+      showButton();
+    }
+  </script>
+</body>
+</html>

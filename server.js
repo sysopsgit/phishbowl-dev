@@ -9,6 +9,7 @@ try {
 }
 
 var ADMIN_EMAIL = "shivam.dungahu@datafortune.com";
+var TENANT_DOMAIN = "@datafortune.com";
 
 var contentTypes = {
   ".html": "text/html",
@@ -22,6 +23,9 @@ var contentTypes = {
   ".svg": "image/svg+xml",
   ".ico": "image/x-icon"
 };
+
+// These files are served without authentication (login page + its styling only).
+var PUBLIC_PATHS = ["/login", "/login.html", "/style.css", "/theme.js"];
 
 var dataDir = process.env.HOME ? path.join(process.env.HOME, "data") : path.join(__dirname, "data");
 try { fs.mkdirSync(dataDir, { recursive: true }); } catch (e) {}
@@ -46,6 +50,10 @@ function getUserEmail(req) {
 function isAdmin(req) {
   var email = getUserEmail(req);
   return !!email && email.toLowerCase() === ADMIN_EMAIL;
+}
+
+function isTenantUser(email) {
+  return !!email && email.toLowerCase().indexOf(TENANT_DOMAIN) !== -1;
 }
 
 function sendJson(res, statusCode, obj) {
@@ -109,77 +117,95 @@ function rowToEntry(row) {
 
 var server = http.createServer(function (req, res) {
   var urlPath = (req.url || "/").split("?")[0];
+  var email = getUserEmail(req);
+  var isAuth = !!email;
+  var isTenant = isTenantUser(email);
 
-  // List uploads
-  if (urlPath === "/api/uploads" && req.method === "GET") {
-    if (!db) { sendJson(res, 200, []); return; }
-    var rows = stmts.list.all();
-    sendJson(res, 200, rows.map(rowToEntry));
+  // Public paths (login page and its styling) — always served.
+  if (PUBLIC_PATHS.indexOf(urlPath) !== -1) {
+    if (urlPath === "/login") {
+      urlPath = "/login.html";
+    }
+    serveFile(res, path.join(__dirname, urlPath));
     return;
   }
 
-  // Upload (admin only)
-  if (urlPath === "/api/upload" && req.method === "POST") {
-    if (!isAdmin(req)) { sendJson(res, 403, { error: "Not authorized" }); return; }
-    if (!db) { sendJson(res, 500, { error: "Storage unavailable" }); return; }
-    readBody(req, function (err, body) {
-      if (err) { sendJson(res, 400, { error: "Bad request" }); return; }
-      try {
-        var payload = JSON.parse(body);
-        var id = "upload-" + Date.now();
-        var imageType = guessImageType(payload.image);
-        var imageBuffer = Buffer.from((payload.image || "").replace(/^data:image\/[a-z0-9.+-]+;base64,/, ""), "base64");
+  // API endpoints — require authenticated tenant user.
+  if (urlPath.indexOf("/api/") === 0 || urlPath.indexOf("/uploads/") === 0) {
+    if (!isTenant) {
+      sendJson(res, isAuth ? 403 : 401, { error: isAuth ? "Access denied" : "Unauthorized" });
+      return;
+    }
 
-        stmts.insert.run(
-          id,
-          payload.category || "",
-          payload.title || "",
-          payload.badge || "",
-          payload.severity || "medium",
-          JSON.stringify(payload.tags || []),
-          imageBuffer,
-          imageType,
-          payload.description || "",
-          JSON.stringify(payload.flags || []),
-          new Date().toISOString()
-        );
+    if (urlPath === "/api/uploads" && req.method === "GET") {
+      if (!db) { sendJson(res, 200, []); return; }
+      sendJson(res, 200, stmts.list.all().map(rowToEntry));
+      return;
+    }
 
-        var row = stmts.getMeta.get(id);
-        sendJson(res, 200, rowToEntry(row));
-      } catch (e) {
-        sendJson(res, 400, { error: "Invalid payload" });
-      }
-    });
+    if (urlPath === "/api/upload" && req.method === "POST") {
+      if (!isAdmin(req)) { sendJson(res, 403, { error: "Not authorized" }); return; }
+      if (!db) { sendJson(res, 500, { error: "Storage unavailable" }); return; }
+      readBody(req, function (err, body) {
+        if (err) { sendJson(res, 400, { error: "Bad request" }); return; }
+        try {
+          var payload = JSON.parse(body);
+          var id = "upload-" + Date.now();
+          var imageType = guessImageType(payload.image);
+          var imageBuffer = Buffer.from((payload.image || "").replace(/^data:image\/[a-z0-9.+-]+;base64,/, ""), "base64");
+          stmts.insert.run(
+            id,
+            payload.category || "",
+            payload.title || "",
+            payload.badge || "",
+            payload.severity || "medium",
+            JSON.stringify(payload.tags || []),
+            imageBuffer,
+            imageType,
+            payload.description || "",
+            JSON.stringify(payload.flags || []),
+            new Date().toISOString()
+          );
+          sendJson(res, 200, rowToEntry(stmts.getMeta.get(id)));
+        } catch (e) {
+          sendJson(res, 400, { error: "Invalid payload" });
+        }
+      });
+      return;
+    }
+
+    if (urlPath.indexOf("/api/uploads/") === 0 && req.method === "DELETE") {
+      if (!isAdmin(req)) { sendJson(res, 403, { error: "Not authorized" }); return; }
+      if (!db) { sendJson(res, 500, { error: "Storage unavailable" }); return; }
+      var id = decodeURIComponent(urlPath.split("/").pop());
+      if (!stmts.getMeta.get(id)) { sendJson(res, 404, { error: "Not found" }); return; }
+      stmts.del.run(id);
+      sendJson(res, 200, { ok: true });
+      return;
+    }
+
+    if (urlPath.indexOf("/uploads/") === 0) {
+      if (!db) { res.writeHead(404); res.end("Not Found"); return; }
+      var imgId = decodeURIComponent(urlPath.split("/").pop());
+      var row = stmts.getImage.get(imgId);
+      if (!row) { res.writeHead(404, { "Content-Type": "text/plain" }); res.end("Not Found"); return; }
+      res.writeHead(200, { "Content-Type": row.image_type || "image/png", "Cache-Control": "public, max-age=31536000, immutable" });
+      res.end(Buffer.from(row.image));
+      return;
+    }
+
+    sendJson(res, 404, { error: "Not found" });
     return;
   }
 
-  // Delete upload (admin only)
-  if (urlPath.indexOf("/api/uploads/") === 0 && req.method === "DELETE") {
-    if (!isAdmin(req)) { sendJson(res, 403, { error: "Not authorized" }); return; }
-    if (!db) { sendJson(res, 500, { error: "Storage unavailable" }); return; }
-    var id = decodeURIComponent(urlPath.split("/").pop());
-    var found = stmts.getMeta.get(id);
-    if (!found) { sendJson(res, 404, { error: "Not found" }); return; }
-    stmts.del.run(id);
-    sendJson(res, 200, { ok: true });
+  // Static pages — require authenticated tenant user.
+  if (!isTenant) {
+    var redirect = isAuth ? "/login?denied=1" : "/login";
+    res.writeHead(302, { "Location": redirect });
+    res.end();
     return;
   }
 
-  // Serve uploaded image
-  if (urlPath.indexOf("/uploads/") === 0) {
-    if (!db) { res.writeHead(404); res.end("Not Found"); return; }
-    var imgId = decodeURIComponent(urlPath.split("/").pop());
-    var row = stmts.getImage.get(imgId);
-    if (!row) { res.writeHead(404, { "Content-Type": "text/plain" }); res.end("Not Found"); return; }
-    res.writeHead(200, {
-      "Content-Type": row.image_type || "image/png",
-      "Cache-Control": "public, max-age=31536000, immutable"
-    });
-    res.end(Buffer.from(row.image));
-    return;
-  }
-
-  // Static files
   if (urlPath === "/" || urlPath === "") {
     urlPath = "/index.html";
   }

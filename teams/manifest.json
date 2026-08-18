@@ -23,6 +23,10 @@
     "full": "Real-world phishing email examples that target our organisation. Learn to recognise credential theft, invoice fraud and impersonation attacks before you fall for them."
   },
   "accentColor": "#1E5796",
+  "webApplicationInfo": {
+    "id": "REPLACE_WITH_TEAMS_APP_CLIENT_ID",
+    "resource": "api://818ca42c-b927-425e-8ec8-134987c527ed"
+  },
   "staticTabs": [
     {
       "entityId": "gallery",
