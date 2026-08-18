@@ -25,7 +25,7 @@ var contentTypes = {
 };
 
 // These files are served without authentication (login page + its styling only).
-var PUBLIC_PATHS = ["/login", "/login.html", "/style.css", "/theme.js"];
+var PUBLIC_PATHS = ["/login", "/login.html", "/style.css", "/theme.js", "/close.html"];
 
 var dataDir = process.env.HOME ? path.join(process.env.HOME, "data") : path.join(__dirname, "data");
 try { fs.mkdirSync(dataDir, { recursive: true }); } catch (e) {}

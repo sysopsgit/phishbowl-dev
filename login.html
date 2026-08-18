@@ -9,76 +9,37 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="theme.js"></script>
-  <script src="https://res.cdn.office.net/teams-js/2.24.0/js/MicrosoftTeams.min.js"></script>
 </head>
 <body>
   <div class="auth-overlay" style="display:flex;">
     <div class="auth-box">
       <div class="brand-mark" style="margin:0 auto 16px;">P</div>
       <h2 id="authTitle">Sign in</h2>
-      <p id="authMessage">Signing you in with your organisation account&hellip;</p>
-      <button class="signin-btn" id="signinBtn" style="display:none;" onclick="browserSignIn()">Sign in with Microsoft</button>
+      <p id="authMessage">Sign in with your organisation account to continue.</p>
+      <button class="signin-btn" id="signinBtn" onclick="browserSignIn()">Sign in with Microsoft</button>
     </div>
   </div>
 
   <script>
     var params = new URLSearchParams(window.location.search);
     var denied = params.get("denied") === "1";
-    var titleEl = document.getElementById("authTitle");
-    var msgEl = document.getElementById("authMessage");
-    var btnEl = document.getElementById("signinBtn");
-
-    function setStatus(title, msg) {
-      titleEl.textContent = title;
-      msgEl.textContent = msg;
-    }
 
     function browserSignIn() {
-      var redirect = window.location.origin + "/";
-      window.location.href = "/.auth/login/aad?post_login_redirect_uri=" + encodeURIComponent(redirect);
-    }
-
-    function showButton() {
-      btnEl.style.display = "";
-    }
-
-    function errDetail(err) {
-      if (!err) return "unknown error";
-      if (typeof err === "string") return err;
-      if (err.message) return err.message;
-      try { return JSON.stringify(err); } catch (e) { return String(err); }
+      var redirect = window.location.origin + "/close.html";
+      var url = "/.auth/login/aad?post_login_redirect_uri=" + encodeURIComponent(redirect);
+      var popup = window.open(url, "phishaware-login", "width=600,height=700");
+      var timer = setInterval(function () {
+        if (!popup || popup.closed) {
+          clearInterval(timer);
+          window.location.href = "/";
+        }
+      }, 500);
     }
 
     if (denied) {
-      setStatus("Access denied", "This resource is restricted to organisation accounts only.");
-    } else if (!window.microsoftTeams || !microsoftTeams.app || !microsoftTeams.authentication) {
-      setStatus("Sign in", "Teams SDK not available. Sign in with your organisation account to continue.");
-      showButton();
-    } else {
-      setStatus("Signing in", "Initialising Teams SDK...");
-      microsoftTeams.app.initialize()
-        .then(function () {
-          setStatus("Signing in", "Requesting token from Teams...");
-          return microsoftTeams.authentication.getAuthToken();
-        })
-        .then(function (token) {
-          setStatus("Signing in", "Exchanging token...");
-          return fetch("/.auth/login/aad", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ access_token: token })
-          }).then(function (resp) {
-            if (!resp.ok) { throw new Error("token exchange HTTP " + resp.status); }
-            return resp;
-          });
-        })
-        .then(function () {
-          window.location.href = "/";
-        })
-        .catch(function (err) {
-          setStatus("Sign in", "Silent sign-in failed: " + errDetail(err));
-          showButton();
-        });
+      document.getElementById("authTitle").textContent = "Access denied";
+      document.getElementById("authMessage").textContent = "This resource is restricted to organisation accounts only.";
+      document.getElementById("signinBtn").style.display = "none";
     }
   </script>
 </body>
